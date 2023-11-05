@@ -14,10 +14,10 @@ export const Modal = ({ onCloseModal, children }) => {
 
   useEffect(() => {
     window.addEventListener('keydown', oncCloseByEsc);
-    document.body.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
     return () => {
       window.removeEventListener('keydown', oncCloseByEsc);
-      document.body.overflow = 'auto';
+      document.body.style.overflow = 'auto';
     };
   }, [oncCloseByEsc]);
 
