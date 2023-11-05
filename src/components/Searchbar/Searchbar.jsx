@@ -1,39 +1,34 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import { SearchBarHeader } from './SearchBar.styled';
 import { SearchForm } from 'components/SearchForm/SearchForm';
 
-export class Searchbar extends Component {
-  state = {
-    searchQuery: '',
-  };
+export const Searchbar = ({ onGetImages }) => {
+  const [searchQuery, setSearchQuery] = useState('');
 
-  onHandleSubmit = e => {
+  const onHandleSubmit = e => {
     e.preventDefault();
-    if (this.state.searchQuery.trim() === '') {
+    if (searchQuery.trim() === '') {
       toast.info('Enter query');
       return;
     }
-    this.props.onGetImages(this.state.searchQuery);
-    this.setState({ searchQuery: '' });
+    onGetImages(searchQuery);
+    setSearchQuery('');
     const form = e.target;
     form.reset();
   };
 
-  saveName = e => {
-    const { name, value } = e.target;
-    this.setState({ [name]: value });
+  const saveName = e => {
+    const { value } = e.target;
+    setSearchQuery(value);
   };
-
-  render() {
-    return (
-      <SearchBarHeader onSubmit={this.onHandleSubmit}>
-        <SearchForm query={this.state.searchQuery} saveName={this.saveName} />
-      </SearchBarHeader>
-    );
-  }
-}
+  return (
+    <SearchBarHeader onSubmit={onHandleSubmit}>
+      <SearchForm query={searchQuery} saveName={saveName} />
+    </SearchBarHeader>
+  );
+};
 
 Searchbar.propTypes = {
   onGetImages: PropTypes.func.isRequired,
