@@ -17,8 +17,9 @@ export const App = () => {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState(null);
   const [modalImage, setModalImage] = useState(null);
+  const [totalImages, setTotalImages] = useState(0);
 
-  const fetchImages = useCallback(async () => {
+  const fetchImages = useCallback(async (query, page) => {
     try {
       setIsLoading(true);
       const response = await getImages(query, page);
@@ -31,66 +32,44 @@ export const App = () => {
         if (totalPages > 1) {
           setIsLoadMore(true);
         }
+        setTotalImages(response.data.totalHits);
       }
       setImages(images => [...images, ...response.data.hits]);
-      const loadedImages = images.length + response.data.hits.length;
-      if (loadedImages >= response.data.totalHits) {
-        setIsLoadMore(false);
-        toast.info('You viewed all pictures');
-      }
     } catch (error) {
       setError(error);
     } finally {
       setIsLoading(false);
     }
-  }, [query, page]);
-
-  // const fetchImages = async (query, page) => {
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await getImages(query, page);
-  //     if (response.data.total === 0) {
-  //       return toast.error('Nothing found for your request');
-  //     }
-  //     if (page === 1) {
-  //       toast.info(`Hooray. We found ${response.data.totalHits} images`);
-  //       const totalPages = response.data.totalHits / response.data.hits.length;
-  //       if (totalPages > 1) {
-  //         setIsLoadMore(true);
-  //       }
-  //     }
-  //     setImages(images => [...images, ...response.data.hits]);
-  //     const loadedImages = images.length + response.data.hits.length;
-  //     if (loadedImages >= response.data.totalHits) {
-  //       setIsLoadMore(false);
-  //       toast.info('You viewed all pictures');
-  //     }
-  //   } catch (error) {
-  //     setError(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  useEffect(() => {
-    setImages([]);
-    setIsLoadMore(false);
-    setPage(1);
-    setError(null);
-  }, [query]);
+  }, []);
 
   useEffect(() => {
     if (query !== '') {
-      fetchImages();
+      fetchImages(query, page);
     }
   }, [query, page, fetchImages]);
+
+  useEffect(() => {
+    if (images.length !== 0) {
+      if (images.length >= totalImages) {
+        setIsLoadMore(false);
+        toast.info('You viewed all pictures');
+      }
+    }
+  }, [images.length, totalImages]);
 
   const loadMore = () => {
     setPage(page => page + 1);
   };
 
-  const saveQuery = query => {
-    setQuery(query);
+  const saveQuery = newQuery => {
+    if (newQuery === query) {
+      return;
+    }
+    setQuery(newQuery);
+    setImages([]);
+    setIsLoadMore(false);
+    setPage(1);
+    setError(null);
   };
 
   const toggleModal = e => {
